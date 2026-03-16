@@ -1,15 +1,14 @@
 #include <stdio.h>
+#include <limits.h>
 
 int main() {
 
-    int n, max, a;
+    int n, max = INT_MIN, a;
     scanf("%d", &n);
 
-    scanf("%d", &max);
-    for(int i = 1; i < n; i++) {
+    for(int i = 0; i < n; i++) {
         scanf("%d", &a);
-        
-        if(a >= max) max = a;
+        if(a > max && a % 5 == 0) max = a;
     }
 
     printf("%d", max);

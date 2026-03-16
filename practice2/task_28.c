@@ -2,17 +2,18 @@
 
 int main() {
 
-    int n, sum = 0;
+    int n, flag = 0;
     scanf("%d", &n);
 
     for(int i = 1; i <= n; i++) {
         int t = i;
         while (t > 0) {
-            sum += t % 10;
+            int digit = t % 10;
+            if(digit == 3) { flag = 1; break; }
             t /= 10;
         }
-        if(sum >= 10) printf("%d ", i);
-        sum = 0;
+        if(flag) { flag = 0; continue; }
+        else printf("%d\n", i);
     }
 
     return 0;

@@ -5,19 +5,22 @@ int main() {
     int n, sum = 0, k;
     scanf("%d", &n);
 
-    int t = n;
-    k = log10(t) + 1;
+    for(int i = 1; i <= n; i++){
+        int t = i;
+        sum = 0;
+        k = log10(i) + 1;
 
-    while (t > 0) {
-        int digit = t % 10;
-        int i = 1;
-        for(int j = 0; j < k; j++) { i *= digit; }
-        sum += i;
-        t /= 10;
+        while (t > 0) {
+            int digit = t % 10;
+            int x = 1;
+            for(int j = 0; j < k; j++) x *= digit; 
+            sum += x;
+            t /= 10;
+        }
+
+        if(i == sum) printf("%d\n", i);
+
     }
-
-    if (sum == n) printf("%d is an armstrong number", n);
-    else printf("%d is not an armstrong number", n);
 
     return 0;
 }

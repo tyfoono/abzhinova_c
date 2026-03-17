@@ -7,9 +7,7 @@ int main() {
 
     int gcd = ((n < k) ? n : k);
     while (gcd > 0) {
-        if (n % gcd == 0 && k % gcd == 0) {
-            break;
-        }
+        if (n % gcd == 0 && k % gcd == 0) break;
         gcd--;
     }
 

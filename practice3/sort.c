@@ -33,7 +33,7 @@ void quick_sort(int arr[], int less, int more){
     }
 }
 
-int main() {
+/* int main() {
     int data[] = {1, 2, 3, -1, 5, 7, 0, 100, -100};
 
     int len = sizeof(data)/sizeof(data[0]);
@@ -46,4 +46,4 @@ int main() {
     print_array(data, len);
 
     return 0;
-}
+} */

@@ -8,7 +8,7 @@ int partition(int arr[], int less, int more){
     int pointer = arr[more];
     int j = less - 1;
 
-    for(int i = less; j < more; j++){
+    for(int i = less; i < more; i++){
         if(arr[i] < pointer) {
             j++;
             int t = arr[i];

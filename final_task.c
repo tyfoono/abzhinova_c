@@ -11,6 +11,8 @@ struct Person {
     int birth_year;
 };
 
+struct Person *people = NULL;
+int n = 0;
 
 // добавление
 int check_name(char *name) {
@@ -52,16 +54,16 @@ struct Person input_person(){
     return res;
 }
 
-struct Person* add_person(struct Person *people, int *n) {
-    struct Person *res = realloc(people, (*n + 1) * sizeof(struct Person));
+void add_person() {
+    struct Person *res = realloc(people, (n + 1) * sizeof(struct Person));
     if(res == NULL) {
         printf("realloc error\n");
-        return people;
+        return;
     }
     struct Person new_person = input_person();
-    res[*n] = new_person; 
-    *n = *n + 1;
-    return res;
+    res[n] = new_person; 
+    n = n + 1;
+    people = res;
 }
 
 
@@ -70,7 +72,7 @@ void print_person(struct Person person) {
     printf("%s - age: %d, height: %.2f, birth year: %d\n", person.name, person.age, person.height, person.birth_year);
 }
 
-void print_people(struct Person *people, int n) {
+void print_people() {
     for(int i = 0; i < n; i++){
         print_person(people[i]);
     }    
@@ -78,27 +80,82 @@ void print_people(struct Person *people, int n) {
 
 
 // сортировки
-int compare_age(struct Person *a, struct Person *b) {
-    return a->age - b->age;
+
+int partition_by_name(int less, int more) {
+    struct Person pivot = people[more];
+    int j = less - 1;
+    
+    for(int i = less; i < more; i++) {
+        if(strcmp(people[i].name, pivot.name) < 0) {
+            j++;
+            struct Person temp = people[i];
+            people[i] = people[j];
+            people[j] = temp;
+        }
+    }
+    
+    struct Person temp = people[j + 1];
+    people[j + 1] = people[more];
+    people[more] = temp;
+    
+    return j + 1;
 }
 
-int compare_name(struct Person *a, struct Person *b) {
-    return strcmp(a->name, b->name);
+void quick_sort_by_name(int less, int more) {
+    if(less < more) {
+        int pivot = partition_by_name(less, more);
+        quick_sort_by_name(less, pivot - 1);
+        quick_sort_by_name(pivot + 1, more);
+    }
 }
 
-void sort_by_age(struct Person *people, int n) {
-    qsort(people, n, sizeof(struct Person), compare_age);
+void sort_by_name() {
+    if(n <= 1) {
+        return;
+    }
+    quick_sort_by_name(0, n - 1);
+    printf("Sorted by name.\n");
+}
+
+int partition_by_age(int less, int more) {
+    struct Person pivot = people[more];
+    int j = less - 1;
+    
+    for(int i = less; i < more; i++) {
+        if(people[i].age < pivot.age) {
+            j++;
+            struct Person temp = people[i];
+            people[i] = people[j];
+            people[j] = temp;
+        }
+    }
+    
+    struct Person temp = people[j + 1];
+    people[j + 1] = people[more];
+    people[more] = temp;
+    
+    return j + 1;
+}
+
+void quick_sort_by_age(int less, int more) {
+    if(less < more) {
+        int pivot = partition_by_age(less, more);
+        quick_sort_by_age(less, pivot - 1);
+        quick_sort_by_age(pivot + 1, more);
+    }
+}
+
+void sort_by_age() {
+    if(n <= 1) {
+        return;
+    }
+    quick_sort_by_age(0, n - 1);
     printf("sorted by age\n");
-}
-
-void sort_by_name(struct Person *people, int n) {
-    qsort(people, n, sizeof(struct Person), compare_name);
-    printf("sorted by name\n");
 }
 
 
 // статистика
-float average_age(struct Person *people, int n) {
+float average_age() {
     float sum = 0;
     for(int i = 0; i < n; i++) {
         sum += people[i].age;
@@ -106,7 +163,7 @@ float average_age(struct Person *people, int n) {
     return sum / n;
 }
 
-float max_height(struct Person *people, int n) {
+float max_height() {
     float max = -1;
     for(int i = 0; i < n; i++){
         if(people[i].height > max) max = people[i].height;
@@ -114,9 +171,18 @@ float max_height(struct Person *people, int n) {
     return max;
 }
 
+void stats() {
+    printf("average age: %f\n", average_age());
+    printf("max height: %f\n", max_height());
+}
 
 // поиск
-void search_by_name(struct Person *people, int n, char *name) {
+void search_by_name() {
+    if(n == 0) {printf("array is empty, add people first"); return;}
+
+    char name[100];
+    printf("enter name: ");
+    scanf("%s", name);
     int flag = 0;
     for(int i = 0; i < n; i++){
         if(strcmp(people[i].name, name) == 0) {
@@ -127,7 +193,15 @@ void search_by_name(struct Person *people, int n, char *name) {
     if(!flag) printf("not found\n");
 }
 
-void search_by_age(struct Person *people, int n, int min_age, int max_age) {
+void search_by_age() {
+    if(n == 0) {printf("array is empty, add people first"); return;}
+
+
+    int min_age, max_age;
+    printf("min age: ");
+    scanf("%d", &min_age);
+    printf("max age: ");
+    scanf("%d", &max_age);
     int flag = 0;
     for(int i = 0; i < n; i++){
         if(people[i].age >= min_age && people[i].age <= max_age) {
@@ -139,8 +213,9 @@ void search_by_age(struct Person *people, int n, int min_age, int max_age) {
 }
 
 
+
 // работа с файлами
-struct Person* load_binary(int *n) {
+void load_binary() {
     char filename[100];
     printf("enter filename: ");
     scanf("%s", filename);
@@ -148,28 +223,28 @@ struct Person* load_binary(int *n) {
     FILE *f = fopen(filename, "rb");
     if(!f) {
         printf("error loading the file\n");
-        *n = 0;
-        return NULL;
+        n = 0;
+        return;
     }
     
-    fread(n, sizeof(int), 1, f);
+    fread(&n, sizeof(int), 1, f);
     
-    struct Person *res = malloc(*n * sizeof(struct Person));
+    struct Person *res = malloc(n * sizeof(struct Person));
     if(!res) {
         printf("Memory allocation failed!\n");
         fclose(f);
-        *n = 0;
-        return NULL;
+        n = 0;
+        return;
     }
     
-    fread(res, sizeof(struct Person), *n, f);
+    fread(res, sizeof(struct Person), n, f);
     fclose(f);
     
-    printf("loaded %d people\n", *n);
-    return res;
+    printf("loaded %d people\n", n);
+    people = res;
 }
 
-void save_binary(struct Person *people, int n) {
+void save_binary() {
     char filename[100];
     printf("enter filename: ");
     scanf("%s", filename);
@@ -187,9 +262,21 @@ void save_binary(struct Person *people, int n) {
 }
 
 
+void (*menu_functions[])(void) = {
+    add_person, 
+    print_people, 
+    sort_by_name,
+    sort_by_age,
+    stats,
+    search_by_name, 
+    search_by_age,
+    save_binary,
+    load_binary 
+};
+
+
 int main(){
-    int n = 0, choice;
-    struct Person *people = NULL;
+    int choice;
     
     do {
         printf("--------------------------\n");
@@ -208,92 +295,11 @@ int main(){
         printf("choice: ");
         scanf("%d", &choice);
         
-
-        switch(choice) {
-            case 1: {
-                people = add_person(people, &n);
-                break;
-            }
-            case 2: {
-                if(n > 0 && people != NULL) {
-                    print_people(people, n);
-                } else {
-                    printf("array is empty, add people first\n");
-                }
-                break;
-            }
-            case 3: {
-                if(n > 0 && people != NULL) {
-                    sort_by_name(people, n);
-                } else {
-                    printf("array is empty, add people first\n");
-                }
-                break;
-            }
-            case 4: {
-                if(n > 0 && people != NULL) {
-                    sort_by_age(people, n);
-                } else {
-                    printf("array is empty, add people first\n");
-                }
-                break;
-            }
-            case 5: {
-                if(n > 0 && people != NULL) {
-                    printf("average age: %.2f\n", average_age(people, n));
-                    printf("maximum height: %.2f\n", max_height(people, n));
-                } else {
-                    printf("array is empty, add people first\n");
-                }
-                break;
-            }
-            case 6: {
-                if(n > 0 && people != NULL) {
-                    char name[100];
-                    printf("enter name: ");
-                    scanf("%s", name);
-                    search_by_name(people, n, name);
-                } else {
-                    printf("array is empty, add people first\n");
-                }
-                break;
-            }
-            case 7: {
-                if(n > 0 && people != NULL) {
-                    int min_age, max_age;
-                    printf("min age: ");
-                    scanf("%d", &min_age);
-                    printf("max age: ");
-                    scanf("%d", &max_age);
-                    search_by_age(people, n, min_age, max_age);
-                } else {
-                    printf("array is empty, add people first\n");
-                }
-                break;
-            }
-            case 8: {
-                if(n > 0 && people != NULL) {
-                    save_binary(people, n);
-                } else {
-                    printf("array is empty, add people first\n");
-                }
-                break;
-            }
-            case 9: {
-                free(people);
-                people = load_binary(&n);
-                break;
-            }
-            case 10: {
-                break;
-            }
-            default: {
-                printf("try again\n");
-                break;
-            }
-        }
+        if(choice >= 1 && choice <= 9) menu_functions[choice - 1](); // Call the appropriate function
+        else if(choice == 10) break;
+        else printf("enter a number 1-10");
         
-    } while (choice != 10);
+    } while (choice != 10); 
 
     free(people);
     return 0;
